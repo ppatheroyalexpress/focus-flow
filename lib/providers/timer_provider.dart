@@ -1,0 +1,193 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/timer_model.dart';
+
+class TimerProvider with ChangeNotifier {
+  late TimerState _state;
+  Timer? _timer;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  // Settings
+  int workDuration = 25;
+  int shortBreakDuration = 5;
+  int longBreakDuration = 15;
+  int sessionsBeforeLongBreak = 4;
+  bool isSoundEnabled = true;
+  bool autoStartBreaks = false;
+
+  TimerProvider() {
+    _state = TimerState(
+      duration: Duration(minutes: workDuration),
+      remainingSeconds: workDuration * 60,
+      isRunning: false,
+      sessionType: SessionType.work,
+      sessionCount: 0,
+    );
+    _loadSettings();
+  }
+
+  TimerState get state => _state;
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    workDuration = prefs.getInt('workDuration') ?? 25;
+    shortBreakDuration = prefs.getInt('shortBreakDuration') ?? 5;
+    longBreakDuration = prefs.getInt('longBreakDuration') ?? 15;
+    isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
+    autoStartBreaks = prefs.getBool('autoStartBreaks') ?? false;
+    
+    final savedCount = prefs.getInt('sessionCount') ?? 0;
+
+    _state = _state.copyWith(
+      duration: Duration(minutes: _getDurationForType(_state.sessionType)),
+      remainingSeconds: _getDurationForType(_state.sessionType) * 60,
+      sessionCount: savedCount,
+    );
+    notifyListeners();
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('workDuration', workDuration);
+    await prefs.setInt('shortBreakDuration', shortBreakDuration);
+    await prefs.setInt('longBreakDuration', longBreakDuration);
+    await prefs.setBool('isSoundEnabled', isSoundEnabled);
+    await prefs.setBool('autoStartBreaks', autoStartBreaks);
+    await prefs.setInt('sessionCount', _state.sessionCount);
+  }
+
+  void updateSettings({
+    int? newWork,
+    int? newShort,
+    int? newLong,
+    bool? newSound,
+    bool? newAutoStart,
+  }) {
+    if (newWork != null) workDuration = newWork;
+    if (newShort != null) shortBreakDuration = newShort;
+    if (newLong != null) longBreakDuration = newLong;
+    if (newSound != null) isSoundEnabled = newSound;
+    if (newAutoStart != null) autoStartBreaks = newAutoStart;
+
+    // Reset current timer if duration for current session type changed
+    final currentTypeDuration = _getDurationForType(_state.sessionType);
+    _state = _state.copyWith(
+      duration: Duration(minutes: currentTypeDuration),
+      remainingSeconds: currentTypeDuration * 60,
+      isRunning: false,
+    );
+    _timer?.cancel();
+    
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void startTimer() {
+    if (_state.isRunning) return;
+
+    _state = _state.copyWith(isRunning: true);
+    notifyListeners();
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_state.remainingSeconds > 0) {
+        _state = _state.copyWith(remainingSeconds: _state.remainingSeconds - 1);
+        notifyListeners();
+      } else {
+        completeSession();
+      }
+    });
+  }
+
+  void pauseTimer() {
+    _timer?.cancel();
+    _state = _state.copyWith(isRunning: false);
+    notifyListeners();
+  }
+
+  void resetTimer() {
+    _timer?.cancel();
+    final durationMinutes = _getDurationForType(_state.sessionType);
+    _state = _state.copyWith(
+      remainingSeconds: durationMinutes * 60,
+      isRunning: false,
+    );
+    notifyListeners();
+  }
+
+  Future<void> completeSession() async {
+    _timer?.cancel();
+    _state = _state.copyWith(isRunning: false);
+    
+    // Play notification sound
+    if (isSoundEnabled) {
+      try {
+        await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
+      } catch (e) {
+        debugPrint('Error playing sound: $e');
+      }
+    }
+
+    // Increment session count if it was a work session
+    int newSessionCount = _state.sessionCount;
+    if (_state.sessionType == SessionType.work) {
+      newSessionCount++;
+    }
+
+    _state = _state.copyWith(sessionCount: newSessionCount);
+    await _saveSettings();
+    notifyListeners();
+    
+    // Move to next session
+    moveToNextSession();
+    
+    // Auto-start next session if it's a break and autoStartBreaks is true
+    if (autoStartBreaks && _state.sessionType != SessionType.work) {
+      startTimer();
+    }
+  }
+
+  void moveToNextSession() {
+    SessionType nextType;
+    
+    if (_state.sessionType == SessionType.work) {
+      if (_state.sessionCount % sessionsBeforeLongBreak == 0 && _state.sessionCount > 0) {
+        nextType = SessionType.longBreak;
+      } else {
+        nextType = SessionType.shortBreak;
+      }
+    } else {
+      nextType = SessionType.work;
+    }
+
+    int durationMinutes = _getDurationForType(nextType);
+    
+    _state = _state.copyWith(
+      sessionType: nextType,
+      duration: Duration(minutes: durationMinutes),
+      remainingSeconds: durationMinutes * 60,
+      isRunning: false,
+    );
+    notifyListeners();
+  }
+
+  int _getDurationForType(SessionType type) {
+    switch (type) {
+      case SessionType.work:
+        return workDuration;
+      case SessionType.shortBreak:
+        return shortBreakDuration;
+      case SessionType.longBreak:
+        return longBreakDuration;
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+}
