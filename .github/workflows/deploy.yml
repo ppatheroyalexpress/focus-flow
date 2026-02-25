@@ -29,7 +29,7 @@ jobs:
           cache: true
 
       # 4. Scaffold missing platform folders (Android/Web)
-      - run: flutter create . --platforms=android,web
+      - run: flutter create . --platforms=android,web --project-name=pomodoro_timer
 
       # 5. Install dependencies
       - run: flutter pub get
