@@ -1,13 +1,14 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/timer_model.dart';
+import '../utils/sound_player.dart';
 
 class TimerProvider with ChangeNotifier {
   late TimerState _state;
   Timer? _timer;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final SoundPlayer _soundPlayer = SoundPlayer();
+
+  // History
+  List<DateTime> _history = [];
 
   // Settings
   int workDuration = 25;
@@ -29,6 +30,7 @@ class TimerProvider with ChangeNotifier {
   }
 
   TimerState get state => _state;
+  List<DateTime> get history => _history;
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -40,6 +42,10 @@ class TimerProvider with ChangeNotifier {
     autoStartBreaks = prefs.getBool('autoStartBreaks') ?? false;
     
     final savedCount = prefs.getInt('sessionCount') ?? 0;
+    
+    // Load History
+    final historyStrings = prefs.getStringList('sessionHistory') ?? [];
+    _history = historyStrings.map((s) => DateTime.parse(s)).toList();
 
     _state = _state.copyWith(
       duration: Duration(minutes: _getDurationForType(_state.sessionType)),
@@ -57,6 +63,10 @@ class TimerProvider with ChangeNotifier {
     await prefs.setBool('isSoundEnabled', isSoundEnabled);
     await prefs.setBool('autoStartBreaks', autoStartBreaks);
     await prefs.setInt('sessionCount', _state.sessionCount);
+    
+    // Save History
+    final historyStrings = _history.map((d) => d.toIso8601String()).toList();
+    await prefs.setStringList('sessionHistory', historyStrings);
   }
 
   void updateSettings({
@@ -123,17 +133,14 @@ class TimerProvider with ChangeNotifier {
     
     // Play notification sound
     if (isSoundEnabled) {
-      try {
-        await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
-      } catch (e) {
-        debugPrint('Error playing sound: $e');
-      }
+      _soundPlayer.playSessionComplete();
     }
 
-    // Increment session count if it was a work session
+    // Increment session count and history if it was a work session
     int newSessionCount = _state.sessionCount;
     if (_state.sessionType == SessionType.work) {
       newSessionCount++;
+      _history.add(DateTime.now());
     }
 
     _state = _state.copyWith(sessionCount: newSessionCount);
@@ -187,7 +194,7 @@ class TimerProvider with ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
-    _audioPlayer.dispose();
+    _soundPlayer.dispose();
     super.dispose();
   }
 }

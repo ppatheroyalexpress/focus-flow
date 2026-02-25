@@ -1,0 +1,44 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_all:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout the code
+      - uses: actions/checkout@v4
+
+      # 2. Set up Flutter
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+          channel: 'stable'
+
+      # 3. Install dependencies
+      - run: flutter pub get
+
+      # 4. Build Web for GitHub Pages
+      - name: Build Web
+        run: flutter build web --release --base-href "/pomodoro-timer/"
+
+      # 5. Build Android APK
+      - name: Build APK
+        run: flutter build apk --release
+
+      # 6. Deploy Web to GitHub Pages branch (gh-pages)
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
+      # 7. Upload APK as a downloadable artifact
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

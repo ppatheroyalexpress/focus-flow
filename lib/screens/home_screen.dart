@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
 import '../models/timer_model.dart';
 import 'settings_screen.dart';
+import 'stats_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -42,6 +43,14 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Pomodoro Timer'),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const StatsScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
