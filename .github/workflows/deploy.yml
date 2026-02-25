@@ -42,16 +42,20 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      # 7. Deploy Web to GitHub Pages branch (gh-pages)
+      # 7. Rename APK for Branding
+      - name: Rename APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/PomodoroTimer-v1.0-SanMarzano.apk
+
+      # 8. Deploy Web to GitHub Pages branch (gh-pages)
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
 
-      # 8. Upload APK as a downloadable artifact
+      # 9. Upload APK as a downloadable artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: PomodoroTimer-v1.0-SanMarzano
+          path: build/app/outputs/flutter-apk/PomodoroTimer-v1.0-SanMarzano.apk
