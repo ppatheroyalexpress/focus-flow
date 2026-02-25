@@ -12,31 +12,38 @@ jobs:
       # 1. Checkout the code
       - uses: actions/checkout@v4
 
-      # 2. Set up Flutter
+      # 2. Set up Java (Required for Android build)
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Set up Flutter
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'latest'
+          flutter-version: '3.22.4'
           channel: 'stable'
+          cache: true
 
-      # 3. Install dependencies
+      # 4. Install dependencies
       - run: flutter pub get
 
-      # 4. Build Web for GitHub Pages
+      # 5. Build Web for GitHub Pages
       - name: Build Web
         run: flutter build web --release --base-href "/pomodoro-timer/"
 
-      # 5. Build Android APK
+      # 6. Build Android APK
       - name: Build APK
         run: flutter build apk --release
 
-      # 6. Deploy Web to GitHub Pages branch (gh-pages)
+      # 7. Deploy Web to GitHub Pages branch (gh-pages)
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
 
-      # 7. Upload APK as a downloadable artifact
+      # 8. Upload APK as a downloadable artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
