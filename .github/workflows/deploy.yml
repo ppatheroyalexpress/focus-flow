@@ -28,7 +28,10 @@ jobs:
           flutter-version: '3.22.x'
           cache: true
 
-      # 4. Install dependencies
+      # 4. Scaffold missing platform folders (Android/Web)
+      - run: flutter create . --platforms=android,web
+
+      # 5. Install dependencies
       - run: flutter pub get
 
       # 5. Build Web for GitHub Pages
