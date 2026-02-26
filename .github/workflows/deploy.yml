@@ -29,14 +29,14 @@ jobs:
           cache: true
 
       # 4. Scaffold missing platform folders (Android/Web)
-      - run: flutter create . --platforms=android,web --project-name=pomodoro_timer
+      - run: flutter create . --platforms=android,web --project-name=focus_flow
 
       # 5. Install dependencies
       - run: flutter pub get
 
       # 5. Build Web for GitHub Pages
       - name: Build Web
-        run: flutter build web --release --base-href "/pomodoro-timer/"
+        run: flutter build web --release --base-href "/focus-flow/"
 
       # 6. Build Android APK
       - name: Build APK
@@ -44,7 +44,7 @@ jobs:
 
       # 7. Rename APK for Branding
       - name: Rename APK
-        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/PomodoroTimer-v1.0-SanMarzano.apk
+        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/FocusFlow-v1.1.apk
 
       # 8. Deploy Web to GitHub Pages branch (gh-pages)
       - name: Deploy to GitHub Pages
@@ -57,5 +57,5 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: PomodoroTimer-v1.0-SanMarzano
-          path: build/app/outputs/flutter-apk/PomodoroTimer-v1.0-SanMarzano.apk
+          name: FocusFlow-v1.1
+          path: build/app/outputs/flutter-apk/FocusFlow-v1.1.apk

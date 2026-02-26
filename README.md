@@ -1,53 +1,65 @@
-# 🌊 Focus Flow - Pomodoro & Tasks (v1.1)
+# 🌊 Focus Flow - Pomodoro & Tasks
 
-A premium cross-platform productivity tool built with Flutter. Helps you manage time effectively using the Pomodoro Technique.
+Focus Flow is a premium, cross-platform productivity tool designed to help you master your focus and manage your tasks seamlessly. Built with Flutter, it combines the proven Pomodoro Technique with a robust task management system, ambient audio, and a "Strict Mode" for deep work.
 
-## 🚀 v1.1 Features:
+## ✨ Key Features
 
-### 📋 To-Do List
-Manage your tasks directly within Focus Flow.
-- Add details: Due dates, priority levels (Low, Medium, High), and notes.
-- **Task Linking**: Select an active task from the Home screen to stay focused on exactly what you need to do.
-- Persistence: All tasks are saved locally on your device.
+### 🍅 Advanced Pomodoro Timer
+- Customizable Focus, Short Break, and Long Break durations.
+- Automated session tracking with history.
+- Visual progress indicators and high-quality notification sounds.
 
-### 🔊 White Noise
-Built-in ambient sounds to help you enter the flow state.
-- Choose from **Forest**, **Rain**, or **Waves**.
-- **Auto-play**: Sounds start automatically with your focus session and pause when you're done.
-- Adjustable volume for the perfect background level.
+### 📋 Integrated To- डू List
+- Manage tasks with due dates, priority levels, and detailed notes.
+- **Task Linking**: Directly link your focus session to a specific task.
+- Session-based progress tracking for tasks.
+
+### 🔊 Ambient Flow (White Noise)
+- Choose from high-quality loops: **Forest**, **Rain**, and **Waves**.
+- Auto-play during focus sessions and auto-pause during breaks.
+- Dedicated volume control for the perfect ambient balance.
 
 ### 🔒 Strict Mode
-For when you need extra discipline.
-- **No Pauses**: Once started, the timer cannot be paused or skipped.
-- **Emergency Exit**: If a real emergency arises, hold the exit button for 5 seconds and confirm to reset.
+- Eliminate distractions by disabling "Pause" during focus sessions.
+- **Emergency Exit**: 5-second long-press confirmation for real-world interruptions.
 
-### 🔔 Daily Reminders
-Never miss a focus session.
-- Configurable reminder intervals (5, 15, or 30 minutes).
-- Local notifications to keep you on track.
+### 📊 Statistics & Data
+- track your daily focus hours and completed sessions.
+- **Data Portability**: Export and Import your data (tasks and stats) as JSON.
+
+### 🔔 Smart Reminders
+- Daily inactivity reminders (5, 15, or 30-minute intervals).
+- Local notifications to keep you on schedule.
+
+## 🚀 Getting Started
+
+### Web
+Launch the web version directly in your browser: [Focus Flow Web](https://patheroyalexpress.github.io/focus-flow/)
+
+### Android
+Download the latest APK from the [Releases](https://github.com/ppatheroyalexpress/focus-flow/releases) page.
+
+## 🛠️ Installation (Development)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ppatheroyalexpress/focus-flow.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd focus_flow
+   ```
+3. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+4. Run the app:
+   ```bash
+   flutter run
+   ```
+
+## 📜 License
+Currently private. Distributed as a portfolio project.
 
 ---
-
-## 🛠 Features (v1.0):
-- Timer with Start/Pause/Reset controls
-- Automatic switching between Focus, Short Break, and Long Break
-- Session counter
-- Sound notifications
-- Customizable durations
-- Statistics tracking
-- Light/Dark UI (Material Design 3)
-
----
-
-## 🚀 Platforms:
-- **Web**: [Launch Web App](https://patheroyalexpress.github.io/pomodoro-timer/)
-- **Android**: [Download v1.1 APK](https://github.com/ppatheroyalexpress/pomodoro-timer/releases/tag/v1.1.0)
-
-## 📖 How to Use:
-1. **Set your Task**: Go to the To-Do list (checklist icon) and add your work.
-2. **Select & Focus**: On the Home screen, tap "What are you working on?" and select your task.
-3. **Customize Audio**: Head to Settings to enable White Noise (Forest/Rain/Waves) and set your volume.
-4. **Enable Strict Mode**: If you're feeling distracted, toggle Strict Mode in Settings.
-5. **Start**: Hit Start and get to work!
-
-Built with Flutter 3.x, Provider for state management, SharedPreferences for local storage.
+Made with ❤️ by [Pyae Phyo Aung](https://github.com/ppatheroyalexpress)
