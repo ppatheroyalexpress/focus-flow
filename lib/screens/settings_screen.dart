@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
+import '../providers/white_noise_provider.dart';
+import '../providers/reminder_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -66,6 +68,80 @@ class SettingsScreen extends StatelessWidget {
                 subtitle: const Text('Start break timer automatically'),
                 value: provider.autoStartBreaks,
                 onChanged: (value) => provider.updateSettings(newAutoStart: value),
+              ),
+              SwitchListTile(
+                title: const Text('Strict Mode'),
+                subtitle: const Text('Disable pausing/skipping during focus'),
+                value: provider.isStrictMode,
+                onChanged: (value) => provider.updateSettings(newStrictMode: value),
+              ),
+              const Divider(),
+              _buildSectionTitle(context, 'White Noise'),
+              Consumer<WhiteNoiseProvider>(
+                builder: (context, noiseProvider, child) {
+                  return Column(
+                    children: [
+                      _buildSettingItem(
+                        title: 'Background Sound',
+                        subtitle: 'Plays looping sound during focus',
+                        child: DropdownButtonFormField<WhiteNoiseType>(
+                          value: noiseProvider.currentType,
+                          decoration: const InputDecoration(border: OutlineInputBorder()),
+                          items: WhiteNoiseType.values.map((type) {
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Text(type.name[0].toUpperCase() + type.name.substring(1)),
+                            );
+                          }).toList(),
+                          onChanged: (val) => noiseProvider.setSound(val!),
+                        ),
+                      ),
+                      if (noiseProvider.currentType != WhiteNoiseType.none)
+                        _buildSettingItem(
+                          title: 'Sound Volume',
+                          subtitle: '${(noiseProvider.volume * 100).toInt()}%',
+                          child: Slider(
+                            value: noiseProvider.volume,
+                            min: 0,
+                            max: 1,
+                            onChanged: (val) => noiseProvider.setVolume(val),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+              const Divider(),
+              _buildSectionTitle(context, 'Daily Reminders'),
+              Consumer<ReminderProvider>(
+                builder: (context, reminderProvider, child) {
+                  return Column(
+                    children: [
+                      SwitchListTile(
+                        title: const Text('Enable Reminders'),
+                        subtitle: const Text('Get daily prompts to stay focused'),
+                        value: reminderProvider.isEnabled,
+                        onChanged: (value) => reminderProvider.toggleReminders(value),
+                      ),
+                      if (reminderProvider.isEnabled)
+                        _buildSettingItem(
+                          title: 'Reminder Interval',
+                          subtitle: 'Receive a prompt every ${reminderProvider.reminderInterval} minutes of inactivity (Simulated)',
+                          child: DropdownButtonFormField<int>(
+                            value: reminderProvider.reminderInterval,
+                            decoration: const InputDecoration(border: OutlineInputBorder()),
+                            items: [5, 15, 30].map((min) {
+                              return DropdownMenuItem(
+                                value: min,
+                                child: Text('$min Minutes'),
+                              );
+                            }).toList(),
+                            onChanged: (val) => reminderProvider.setInterval(val!),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           );

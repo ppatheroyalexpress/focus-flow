@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
 import '../providers/todo_provider.dart';
+import '../providers/white_noise_provider.dart';
 import '../models/timer_model.dart';
 import '../models/todo.dart';
 import 'settings_screen.dart';
@@ -139,7 +140,10 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     if (!state.isRunning)
                       ElevatedButton.icon(
-                        onPressed: timerProvider.startTimer,
+                        onPressed: () {
+                          timerProvider.startTimer();
+                          context.read<WhiteNoiseProvider>().resumeSound();
+                        },
                         icon: const Icon(Icons.play_arrow),
                         label: const Text('Start'),
                         style: ElevatedButton.styleFrom(
@@ -148,7 +152,10 @@ class HomeScreen extends StatelessWidget {
                       )
                     else
                       ElevatedButton.icon(
-                        onPressed: timerProvider.pauseTimer,
+                        onPressed: () {
+                          timerProvider.pauseTimer();
+                          context.read<WhiteNoiseProvider>().pauseSound();
+                        },
                         icon: const Icon(Icons.pause),
                         label: const Text('Pause'),
                         style: ElevatedButton.styleFrom(
@@ -157,7 +164,10 @@ class HomeScreen extends StatelessWidget {
                       ),
                     const SizedBox(width: 20),
                     OutlinedButton.icon(
-                      onPressed: timerProvider.resetTimer,
+                      onPressed: () {
+                        timerProvider.resetTimer();
+                        context.read<WhiteNoiseProvider>().pauseSound();
+                      },
                       icon: const Icon(Icons.refresh),
                       label: const Text('Reset'),
                       style: OutlinedButton.styleFrom(
