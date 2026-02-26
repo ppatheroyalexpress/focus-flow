@@ -36,10 +36,15 @@ class TodoScreen extends StatelessWidget {
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: provider.todos.length,
             itemBuilder: (context, index) {
               final todo = provider.todos[index];
-              return _TodoTile(todo: todo);
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: 1.0,
+                child: _TodoTile(todo: todo),
+              );
             },
           );
         },
@@ -70,48 +75,93 @@ class _TodoTile extends StatelessWidget {
     final provider = Provider.of<TodoProvider>(context, listen: false);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: Checkbox(
-          value: todo.isCompleted,
-          onChanged: (_) => provider.toggleTodo(todo.id),
-        ),
-        title: Text(
-          todo.title,
-          style: TextStyle(
-            decoration: todo.isCompleted ? TextDecoration.lineThrough : null,
-            fontWeight: FontWeight.bold,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (todo.dueDate != null)
-              Row(
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showTodoDetails(context, todo),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 14),
-                  const SizedBox(width: 4),
-                  Text(DateFormat('MMM d, yyyy').format(todo.dueDate!)),
+                  Transform.scale(
+                    scale: 1.2,
+                    child: Checkbox(
+                      value: todo.isCompleted,
+                      shape: const CircleBorder(),
+                      activeColor: _getSessionColor(Provider.of<TimerProvider>(context, listen: false).state.sessionType),
+                      onChanged: (_) => provider.toggleTodo(todo.id),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          todo.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            decoration: todo.isCompleted ? TextDecoration.lineThrough : null,
+                            color: todo.isCompleted ? Colors.grey : null,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            _buildPriorityBadge(todo.priority),
+                            if (todo.dueDate != null) ...[
+                              const SizedBox(width: 8),
+                              Icon(Icons.calendar_today, size: 12, color: Colors.grey[600]),
+                              const SizedBox(width: 4),
+                              Text(
+                                DateFormat('MMM d').format(todo.dueDate!),
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              ),
+                            ],
+                            if (todo.notes.isNotEmpty) ...[
+                              const SizedBox(width: 8),
+                              Icon(Icons.notes, size: 12, color: Colors.grey[600]),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: Colors.red[300], size: 20),
+                    onPressed: () => provider.deleteTodo(todo.id),
+                  ),
                 ],
               ),
-            Row(
-              children: [
-                _buildPriorityBadge(todo.priority),
-                const SizedBox(width: 8),
-                if (todo.notes.isNotEmpty)
-                  const Icon(Icons.notes, size: 14, color: Colors.grey),
-              ],
             ),
-          ],
+          ),
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline, color: Colors.red),
-          onPressed: () => provider.deleteTodo(todo.id),
-        ),
-        onTap: () => _showTodoDetails(context, todo),
       ),
     );
+  }
+
+  Color _getSessionColor(SessionType type) {
+    switch (type) {
+      case SessionType.work: return Colors.redAccent;
+      case SessionType.shortBreak: return Colors.greenAccent;
+      case SessionType.longBreak: return Colors.blueAccent;
+    }
   }
 
   Widget _buildPriorityBadge(TodoPriority priority) {

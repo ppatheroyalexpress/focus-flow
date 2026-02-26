@@ -13,6 +13,13 @@ class WhiteNoiseProvider with ChangeNotifier {
 
   WhiteNoiseProvider() {
     _player.setReleaseMode(ReleaseMode.loop);
+    _precacheAssets();
+  }
+
+  Future<void> _precacheAssets() async {
+    // Audioplayers handles caching automatically for AssetSource,
+    // but we can ensure the player is initialized with the current volume.
+    await _player.setVolume(_volume);
   }
 
   Future<void> setSound(WhiteNoiseType type) async {

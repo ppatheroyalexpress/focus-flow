@@ -82,11 +82,16 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  _getSessionName(state.sessionType),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: _getSessionColor(state.sessionType),
-                    fontWeight: FontWeight.bold,
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  child: Text(
+                    _getSessionName(state.sessionType),
+                    key: ValueKey(state.sessionType),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: _getSessionColor(state.sessionType),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -95,44 +100,59 @@ class HomeScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 20),
-                Consumer<TodoProvider>(
-                  builder: (context, todoProvider, child) {
-                    final activeTodo = todoProvider.activeTodo;
-                    return InkWell(
-                      onTap: () => _showTaskSelection(context, todoProvider),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: _getSessionColor(state.sessionType).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: _getSessionColor(state.sessionType).withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Consumer<TodoProvider>(
+                    builder: (context, todoProvider, child) {
+                      final activeTodo = todoProvider.activeTodo;
+                      return InkWell(
+                        onTap: () => _showTaskSelection(context, todoProvider),
+                        borderRadius: BorderRadius.circular(30),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              activeTodo != null ? Icons.check_circle_outline : Icons.add_circle_outline,
-                              size: 18,
+                              activeTodo != null ? Icons.check_circle : Icons.radio_button_unchecked,
+                              size: 20,
                               color: _getSessionColor(state.sessionType),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
                             Text(
-                              activeTodo?.title ?? 'Select Task',
-                              style: const TextStyle(fontWeight: FontWeight.w500),
+                              activeTodo?.title ?? 'What are you working on?',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  _formatTime(state.remainingSeconds),
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontSize: 100,
-                    fontWeight: FontWeight.w200,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                Selector<TimerProvider, int>(
+                  selector: (_, provider) => provider.state.remainingSeconds,
+                  builder: (context, seconds, child) {
+                    return Text(
+                      _formatTime(seconds),
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                            fontSize: 84,
+                            fontWeight: FontWeight.bold,
+                            color: _getSessionColor(state.sessionType),
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 60),
                 Row(
