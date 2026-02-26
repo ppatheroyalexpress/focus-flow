@@ -205,6 +205,14 @@ class HomeScreen extends StatelessWidget {
                             backgroundColor: Colors.red.withOpacity(0.1),
                           ),
                         ),
+                        if (timerProvider.emergencyProgress >= 1.0) ...[
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => _showEmergencyConfirmation(context, timerProvider),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                            child: const Text('Confirm Emergency Exit'),
+                          ),
+                        ],
                       ],
                     ],
                   ),
@@ -262,6 +270,33 @@ class HomeScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showEmergencyConfirmation(BuildContext context, TimerProvider provider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Emergency Exit'),
+        content: const Text('Are you sure you want to exit? Your focus session will be reset.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              provider.cancelEmergencyExit();
+              Navigator.pop(context);
+            },
+            child: const Text('Stay'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              provider.confirmEmergencyExit();
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Exit Now'),
+          ),
+        ],
+      ),
     );
   }
 }

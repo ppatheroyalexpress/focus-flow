@@ -19,6 +19,10 @@ class TimerProvider with ChangeNotifier {
   int sessionsBeforeLongBreak = 4;
   bool isSoundEnabled = true;
   bool autoStartBreaks = false;
+  bool isStrictMode = false;
+
+  Timer? _emergencyTimer;
+  double emergencyProgress = 0.0;
 
   TimerProvider() {
     _state = TimerState(
@@ -42,6 +46,7 @@ class TimerProvider with ChangeNotifier {
     longBreakDuration = prefs.getInt('longBreakDuration') ?? 15;
     isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
     autoStartBreaks = prefs.getBool('autoStartBreaks') ?? false;
+    isStrictMode = prefs.getBool('isStrictMode') ?? false;
     
     final savedCount = prefs.getInt('sessionCount') ?? 0;
     
@@ -64,6 +69,7 @@ class TimerProvider with ChangeNotifier {
     await prefs.setInt('longBreakDuration', longBreakDuration);
     await prefs.setBool('isSoundEnabled', isSoundEnabled);
     await prefs.setBool('autoStartBreaks', autoStartBreaks);
+    await prefs.setBool('isStrictMode', isStrictMode);
     await prefs.setInt('sessionCount', _state.sessionCount);
     
     // Save History
@@ -77,12 +83,14 @@ class TimerProvider with ChangeNotifier {
     int? newLong,
     bool? newSound,
     bool? newAutoStart,
+    bool? newStrictMode,
   }) {
     if (newWork != null) workDuration = newWork;
     if (newShort != null) shortBreakDuration = newShort;
     if (newLong != null) longBreakDuration = newLong;
     if (newSound != null) isSoundEnabled = newSound;
     if (newAutoStart != null) autoStartBreaks = newAutoStart;
+    if (newStrictMode != null) isStrictMode = newStrictMode;
 
     // Reset current timer if duration for current session type changed
     final currentTypeDuration = _getDurationForType(_state.sessionType);
@@ -114,12 +122,20 @@ class TimerProvider with ChangeNotifier {
   }
 
   void pauseTimer() {
+    if (isStrictMode && _state.sessionType == SessionType.work && _state.isRunning) {
+      // In strict mode, cannot pause during work sessions
+      return;
+    }
     _timer?.cancel();
     _state = _state.copyWith(isRunning: false);
     notifyListeners();
   }
 
   void resetTimer() {
+    if (isStrictMode && _state.sessionType == SessionType.work && _state.isRunning) {
+      // In strict mode, cannot reset during work sessions
+      return;
+    }
     _timer?.cancel();
     final durationMinutes = _getDurationForType(_state.sessionType);
     _state = _state.copyWith(
@@ -193,9 +209,44 @@ class TimerProvider with ChangeNotifier {
     }
   }
 
+  void startEmergencyExit() {
+    _emergencyTimer?.cancel();
+    emergencyProgress = 0.0;
+    _emergencyTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      emergencyProgress += 0.02; // 100ms * 50 = 5000ms
+      if (emergencyProgress >= 1.0) {
+        emergencyProgress = 1.0;
+        _emergencyTimer?.cancel();
+      }
+      notifyListeners();
+    });
+  }
+
+  void confirmEmergencyExit() {
+    _forceExitStrictMode();
+    cancelEmergencyExit();
+  }
+
+  void cancelEmergencyExit() {
+    _emergencyTimer?.cancel();
+    emergencyProgress = 0.0;
+    notifyListeners();
+  }
+
+  void _forceExitStrictMode() {
+    _timer?.cancel();
+    final durationMinutes = _getDurationForType(_state.sessionType);
+    _state = _state.copyWith(
+      remainingSeconds: durationMinutes * 60,
+      isRunning: false,
+    );
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
+    _emergencyTimer?.cancel();
     _soundPlayer.dispose();
     super.dispose();
   }
