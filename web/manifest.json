@@ -1,11 +1,11 @@
 {
-    "name": "Pomodoro Timer",
-    "short_name": "Pomodoro",
+    "name": "Focus Flow",
+    "short_name": "Focus Flow",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#673ab7",
-    "description": "A premium Pomodoro Timer for deep focus.",
+    "description": "Focus Flow - A premium Pomodoro Timer & Task Manager for deep work.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

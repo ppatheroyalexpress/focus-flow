@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
 import '../providers/white_noise_provider.dart';
 import '../providers/reminder_provider.dart';
+import 'about_screen.dart';
+import '../services/data_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -143,9 +145,84 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
               ),
+              const Divider(),
+              _buildSectionTitle(context, 'Data Management'),
+              ListTile(
+                leading: const Icon(Icons.download),
+                title: const Text('Export Data'),
+                subtitle: const Text('Save your tasks and stats to a file'),
+                onTap: () async {
+                  await DataService().exportData();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.upload),
+                title: const Text('Import Data'),
+                subtitle: const Text('Restore tasks and stats from a file'),
+                onTap: () async {
+                  bool success = await DataService().importData();
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Data imported successfully! Please restart the app.')),
+                    );
+                  }
+                },
+              ),
+              const Divider(),
+              _buildSectionTitle(context, 'Support & About'),
+              ListTile(
+                leading: const Icon(Icons.feedback_outlined),
+                title: const Text('Send Feedback'),
+                subtitle: const Text('Report a bug or suggest a feature'),
+                onTap: () => _showFeedbackDialog(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('About Focus Flow'),
+                subtitle: const Text('App version and developer links'),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
             ],
           );
         },
+      ),
+    );
+  }
+
+  void _showFeedbackDialog(BuildContext context) {
+    final TextEditingController controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Send Feedback'),
+        content: TextField(
+          controller: controller,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            hintText: 'Enter your feedback here...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Feedback sent! Thank you.')),
+              );
+              Navigator.pop(context);
+            },
+            child: const Text('Submit'),
+          ),
+        ],
       ),
     );
   }

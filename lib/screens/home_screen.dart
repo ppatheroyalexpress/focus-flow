@@ -1,17 +1,22 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
 import '../providers/todo_provider.dart';
 import '../providers/white_noise_provider.dart';
 import '../models/timer_model.dart';
-import '../models/todo.dart';
 import 'settings_screen.dart';
 import 'stats_screen.dart';
 import 'todo_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   String _formatTime(int seconds) {
     final int minutes = seconds ~/ 60;
     final int remainingSeconds = seconds % 60;
@@ -42,43 +47,52 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pomodoro Timer'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.checklist),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const TodoScreen()),
-              );
-            },
-            tooltip: 'To-Do List',
+    return Consumer<TimerProvider>(
+      builder: (context, timerProvider, child) {
+        // Schedule the dialog to show after the current frame
+        if (timerProvider.shouldShowRateDialog) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (timerProvider.shouldShowRateDialog) {
+              _showRateDialog(context, timerProvider);
+            }
+          });
+        }
+
+        final state = timerProvider.state;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Focus Flow'),
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.checklist),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const TodoScreen()),
+                  );
+                },
+                tooltip: 'To-Do List',
+              ),
+              IconButton(
+                icon: const Icon(Icons.bar_chart),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const StatsScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
+                },
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const StatsScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<TimerProvider>(
-        builder: (context, timerProvider, child) {
-          final state = timerProvider.state;
-          
-          return Center(
+          body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -88,10 +102,10 @@ class HomeScreen extends StatelessWidget {
                     _getSessionName(state.sessionType),
                     key: ValueKey(state.sessionType),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: _getSessionColor(state.sessionType),
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
+                          color: _getSessionColor(state.sessionType),
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -239,8 +253,39 @@ class HomeScreen extends StatelessWidget {
                 ],
               ],
             ),
-          );
-        },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showRateDialog(BuildContext context, TimerProvider provider) {
+    provider.dismissRateDialog(); 
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Enjoying the App?'),
+        content: const Text('You have completed 5 focus sessions! Would you like to rate the app?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              provider.markAsRated();
+              Navigator.pop(context);
+            },
+            child: const Text('Maybe Later'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              provider.markAsRated();
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Thank you for your support!')),
+              );
+            },
+            child: const Text('Rate Now'),
+          ),
+        ],
       ),
     );
   }

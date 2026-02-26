@@ -24,6 +24,10 @@ class TimerProvider with ChangeNotifier {
   Timer? _emergencyTimer;
   double emergencyProgress = 0.0;
 
+  int totalSessionsCompleted = 0;
+  bool hasRatedApp = false;
+  bool shouldShowRateDialog = false;
+
   TimerProvider() {
     _state = TimerState(
       duration: Duration(minutes: workDuration),
@@ -47,6 +51,8 @@ class TimerProvider with ChangeNotifier {
     isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
     autoStartBreaks = prefs.getBool('autoStartBreaks') ?? false;
     isStrictMode = prefs.getBool('isStrictMode') ?? false;
+    totalSessionsCompleted = prefs.getInt('totalSessionsCompleted') ?? 0;
+    hasRatedApp = prefs.getBool('hasRatedApp') ?? false;
     
     final savedCount = prefs.getInt('sessionCount') ?? 0;
     
@@ -71,6 +77,8 @@ class TimerProvider with ChangeNotifier {
     await prefs.setBool('autoStartBreaks', autoStartBreaks);
     await prefs.setBool('isStrictMode', isStrictMode);
     await prefs.setInt('sessionCount', _state.sessionCount);
+    await prefs.setInt('totalSessionsCompleted', totalSessionsCompleted);
+    await prefs.setBool('hasRatedApp', hasRatedApp);
     
     // Save History
     final historyStrings = _history.map((d) => d.toIso8601String()).toList();
@@ -123,7 +131,6 @@ class TimerProvider with ChangeNotifier {
 
   void pauseTimer() {
     if (isStrictMode && _state.sessionType == SessionType.work && _state.isRunning) {
-      // In strict mode, cannot pause during work sessions
       return;
     }
     _timer?.cancel();
@@ -133,7 +140,6 @@ class TimerProvider with ChangeNotifier {
 
   void resetTimer() {
     if (isStrictMode && _state.sessionType == SessionType.work && _state.isRunning) {
-      // In strict mode, cannot reset during work sessions
       return;
     }
     _timer?.cancel();
@@ -149,34 +155,46 @@ class TimerProvider with ChangeNotifier {
     _timer?.cancel();
     _state = _state.copyWith(isRunning: false);
     
-    // Play notification sound
     if (isSoundEnabled) {
       _soundPlayer.playSessionComplete();
     }
 
-    // Increment session count and history if it was a work session
     int newSessionCount = _state.sessionCount;
     if (_state.sessionType == SessionType.work) {
       newSessionCount++;
+      totalSessionsCompleted++;
       _history.add(DateTime.now());
+
+      if (!hasRatedApp && totalSessionsCompleted == 5) {
+        shouldShowRateDialog = true;
+      }
     }
 
     _state = _state.copyWith(sessionCount: newSessionCount);
     await _saveSettings();
     notifyListeners();
     
-    // Move to next session
     moveToNextSession();
     
-    // Auto-start next session if it's a break and autoStartBreaks is true
     if (autoStartBreaks && _state.sessionType != SessionType.work) {
       startTimer();
     }
   }
 
+  void dismissRateDialog() {
+    shouldShowRateDialog = false;
+    notifyListeners();
+  }
+
+  void markAsRated() {
+    hasRatedApp = true;
+    shouldShowRateDialog = false;
+    _saveSettings();
+    notifyListeners();
+  }
+
   void moveToNextSession() {
     SessionType nextType;
-    
     if (_state.sessionType == SessionType.work) {
       if (_state.sessionCount % sessionsBeforeLongBreak == 0 && _state.sessionCount > 0) {
         nextType = SessionType.longBreak;
@@ -213,7 +231,7 @@ class TimerProvider with ChangeNotifier {
     _emergencyTimer?.cancel();
     emergencyProgress = 0.0;
     _emergencyTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      emergencyProgress += 0.02; // 100ms * 50 = 5000ms
+      emergencyProgress += 0.02;
       if (emergencyProgress >= 1.0) {
         emergencyProgress = 1.0;
         _emergencyTimer?.cancel();

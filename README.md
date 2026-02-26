@@ -1,27 +1,27 @@
-# 🍅 Pomodoro Timer - San Marzano (v1.1)
+# 🌊 Focus Flow - Pomodoro & Tasks (v1.1)
 
-A cross-platform Pomodoro Technique timer application built with Flutter. Helps you manage time effectively using the proven Pomodoro Technique.
+A premium cross-platform productivity tool built with Flutter. Helps you manage time effectively using the Pomodoro Technique.
 
-## 🚀 v1.1 "San Marzano" Features:
+## 🚀 v1.1 Features:
 
-### 📋 To-Do List (New!)
-Manage your tasks directly within the timer.
+### 📋 To-Do List
+Manage your tasks directly within Focus Flow.
 - Add details: Due dates, priority levels (Low, Medium, High), and notes.
 - **Task Linking**: Select an active task from the Home screen to stay focused on exactly what you need to do.
 - Persistence: All tasks are saved locally on your device.
 
-### 🔊 White Noise (New!)
+### 🔊 White Noise
 Built-in ambient sounds to help you enter the flow state.
 - Choose from **Forest**, **Rain**, or **Waves**.
 - **Auto-play**: Sounds start automatically with your focus session and pause when you're done.
 - Adjustable volume for the perfect background level.
 
-### 🔒 Strict Mode (New!)
+### 🔒 Strict Mode
 For when you need extra discipline.
 - **No Pauses**: Once started, the timer cannot be paused or skipped.
 - **Emergency Exit**: If a real emergency arises, hold the exit button for 5 seconds and confirm to reset.
 
-### 🔔 Daily Reminders (New!)
+### 🔔 Daily Reminders
 Never miss a focus session.
 - Configurable reminder intervals (5, 15, or 30 minutes).
 - Local notifications to keep you on track.
