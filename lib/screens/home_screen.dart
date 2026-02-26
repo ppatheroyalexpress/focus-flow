@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
+import '../providers/todo_provider.dart';
 import '../models/timer_model.dart';
+import '../models/todo.dart';
 import 'settings_screen.dart';
 import 'stats_screen.dart';
+import 'todo_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -44,6 +47,15 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.checklist),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const TodoScreen()),
+              );
+            },
+            tooltip: 'To-Do List',
+          ),
+          IconButton(
             icon: const Icon(Icons.bar_chart),
             onPressed: () {
               Navigator.of(context).push(
@@ -81,7 +93,38 @@ class HomeScreen extends StatelessWidget {
                   'Session ${state.sessionCount + 1}',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+                Consumer<TodoProvider>(
+                  builder: (context, todoProvider, child) {
+                    final activeTodo = todoProvider.activeTodo;
+                    return InkWell(
+                      onTap: () => _showTaskSelection(context, todoProvider),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              activeTodo != null ? Icons.check_circle_outline : Icons.add_circle_outline,
+                              size: 18,
+                              color: _getSessionColor(state.sessionType),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              activeTodo?.title ?? 'Select Task',
+                              style: const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
                 Text(
                   _formatTime(state.remainingSeconds),
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
@@ -123,11 +166,92 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (timerProvider.isStrictMode && state.isRunning && state.sessionType == SessionType.work) ...[
+                  const SizedBox(height: 40),
+                  Column(
+                    children: [
+                      GestureDetector(
+                        onLongPressStart: (_) => timerProvider.startEmergencyExit(),
+                        onLongPressEnd: (_) => timerProvider.cancelEmergencyExit(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.red),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Emergency Exit (Hold 5s)',
+                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      if (timerProvider.emergencyProgress > 0) ...[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: 200,
+                          child: LinearProgressIndicator(
+                            value: timerProvider.emergencyProgress,
+                            color: Colors.red,
+                            backgroundColor: Colors.red.withOpacity(0.1),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ],
             ),
           );
         },
       ),
+    );
+  }
+
+  void _showTaskSelection(BuildContext context, TodoProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Select Task', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Divider(),
+              if (provider.todos.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('No tasks available. Go to To-Do list to add some.'),
+                ),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: provider.todos.length,
+                  itemBuilder: (context, index) {
+                    final todo = provider.todos[index];
+                    return ListTile(
+                      title: Text(todo.title),
+                      selected: provider.activeTodoId == todo.id,
+                      onTap: () {
+                        provider.setActiveTodo(todo.id);
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+              if (provider.activeTodoId != null)
+                TextButton(
+                  onPressed: () {
+                    provider.setActiveTodo(null);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Clear Selection', style: TextStyle(color: Colors.red)),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
