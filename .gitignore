@@ -24,3 +24,8 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Antigravity
+.antigravity/sessions/
+.antigravity/history/
+.antigravity/*.log

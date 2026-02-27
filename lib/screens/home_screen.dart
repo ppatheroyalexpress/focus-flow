@@ -34,14 +34,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Color _getSessionColor(SessionType type) {
+  Color _getSessionColor(BuildContext context, SessionType type) {
+    final colorScheme = Theme.of(context).colorScheme;
     switch (type) {
       case SessionType.work:
-        return Colors.redAccent;
+        return colorScheme.primary; // Deep Teal
       case SessionType.shortBreak:
-        return Colors.greenAccent;
+        return const Color(0xFF4DB6AC); // Seafoam
       case SessionType.longBreak:
-        return Colors.blueAccent;
+        return const Color(0xFF0097A7); // Oceanic Blue
     }
   }
 
@@ -102,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _getSessionName(state.sessionType),
                     key: ValueKey(state.sessionType),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: _getSessionColor(state.sessionType),
+                          color: _getSessionColor(context, state.sessionType),
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
                         ),
@@ -118,10 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
-                    color: _getSessionColor(state.sessionType).withOpacity(0.1),
+                    color: _getSessionColor(context, state.sessionType).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(
-                      color: _getSessionColor(state.sessionType).withOpacity(0.3),
+                      color: _getSessionColor(context, state.sessionType).withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -137,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Icon(
                               activeTodo != null ? Icons.check_circle : Icons.radio_button_unchecked,
                               size: 20,
-                              color: _getSessionColor(state.sessionType),
+                              color: _getSessionColor(context, state.sessionType),
                             ),
                             const SizedBox(width: 10),
                             Text(
@@ -162,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
                             fontSize: 84,
                             fontWeight: FontWeight.bold,
-                            color: _getSessionColor(state.sessionType),
+                            color: _getSessionColor(context, state.sessionType),
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                     );

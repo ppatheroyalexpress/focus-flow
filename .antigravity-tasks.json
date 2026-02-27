@@ -1,0 +1,35 @@
+{
+    "version": "1.0.0",
+    "tasks": [
+        {
+            "label": "Flutter Run (Debug)",
+            "command": "flutter run",
+            "group": "build",
+            "description": "Run the application in debug mode"
+        },
+        {
+            "label": "Flutter Build APK",
+            "command": "flutter build apk --release",
+            "group": "build",
+            "description": "Build a release APK"
+        },
+        {
+            "label": "Run Tests",
+            "command": "flutter test",
+            "group": "test",
+            "description": "Run unit and widget tests"
+        },
+        {
+            "label": "Flutter Clean",
+            "command": "flutter clean",
+            "group": "cleanup",
+            "description": "Clean the project build artifacts"
+        },
+        {
+            "label": "Get Dependencies",
+            "command": "flutter pub get",
+            "group": "setup",
+            "description": "Fetch project dependencies"
+        }
+    ]
+}

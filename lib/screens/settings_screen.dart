@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
 import '../providers/white_noise_provider.dart';
 import '../providers/reminder_provider.dart';
+import '../providers/theme_provider.dart';
 import 'about_screen.dart';
 import '../services/data_service.dart';
 
@@ -20,6 +21,28 @@ class SettingsScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
+              _buildSectionTitle(context, 'Appearance'),
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+                  return SwitchListTile(
+                    secondary: Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: const Text('Dark Mode'),
+                    subtitle: Text(
+                      themeProvider.themeMode == ThemeMode.dark
+                          ? 'Deep sea aesthetics enabled'
+                          : 'Bright and crisp oceanic view',
+                    ),
+                    value: themeProvider.themeMode == ThemeMode.dark,
+                    onChanged: (value) => themeProvider.toggleTheme(value),
+                  );
+                },
+              ),
+              const Divider(),
               _buildSectionTitle(context, 'Timer Durations'),
               _buildSettingItem(
                 title: 'Focus Duration',

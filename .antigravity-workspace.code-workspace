@@ -1,0 +1,21 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "antigravity.projectName": "Focus Flow",
+        "antigravity.theme": "Oceanic",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.lint": "explicit"
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "dart-code.flutter",
+            "antigravity.antigravity-extension"
+        ]
+    }
+}

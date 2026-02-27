@@ -1,0 +1,15 @@
+{
+  "extensionSettings": {
+    "dart.analysisExcludedFolders": [
+      ".dart_tool",
+      "build"
+    ],
+    "flutter.hotReloadOnSave": true,
+    "antigravity.autoFixLints": true,
+    "antigravity.webSearchPriority": [
+      "flutter.dev",
+      "pub.dev",
+      "material.io"
+    ]
+  }
+}

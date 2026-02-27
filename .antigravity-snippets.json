@@ -1,0 +1,40 @@
+{
+    "Flutter Provider Consumer": {
+        "prefix": "fpc",
+        "body": [
+            "Consumer<${1:ProviderClass}>(",
+            "  builder: (context, ${2:value}, child) {",
+            "    return ${3:Widget};",
+            "  },",
+            ")"
+        ],
+        "description": "Flutter Consumer widget from Provider"
+    },
+    "Material 3 Card": {
+        "prefix": "m3card",
+        "body": [
+            "Card(",
+            "  elevation: ${1:2},",
+            "  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(${2:16})),",
+            "  child: Padding(",
+            "    padding: const EdgeInsets.all(${3:16}),",
+            "    child: ${4:child},",
+            "  ),",
+            ")"
+        ],
+        "description": "Standard Material 3 styled card"
+    },
+    "Oceanic Text Style": {
+        "prefix": "otext",
+        "body": [
+            "Text(",
+            "  '${1:text}',",
+            "  style: Theme.of(context).textTheme.${2:bodyLarge}?.copyWith(",
+            "    color: Theme.of(context).colorScheme.primary,",
+            "    fontWeight: FontWeight.bold,",
+            "  ),",
+            ")"
+        ],
+        "description": "Text styled with Oceanic palette primary color"
+    }
+}

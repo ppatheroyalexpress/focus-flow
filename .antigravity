@@ -1,0 +1,21 @@
+# Focus Flow - Antigravity Project Settings
+# This file defines project-specific rules and context for Antigravity AI.
+
+project_name: "Focus Flow"
+description: "A premium Pomodoro Timer & Task Management app built with Flutter."
+primary_language: "Dart"
+framework: "Flutter"
+
+# Core Development Rules
+rules:
+  - "Follow Material 3 design guidelines strictly."
+  - "Use the Oceanic Palette (Deep Teal 0xFF006064) for all UI components."
+  - "Ensure all new features support both Light and Dark modes."
+  - "Use Provider for state management across the application."
+  - "Maintain clean architecture by separating logic from UI."
+
+# Directories to prioritize
+critical_paths:
+  - "lib/theme/"
+  - "lib/providers/"
+  - "lib/screens/"

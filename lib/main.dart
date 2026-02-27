@@ -9,6 +9,10 @@ import 'services/notification_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
 
+import 'theme/app_theme.dart';
+
+import 'providers/theme_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
@@ -18,6 +22,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => TimerProvider()),
         ChangeNotifierProvider(create: (_) => TodoProvider()),
         ChangeNotifierProvider(create: (_) => WhiteNoiseProvider()),
@@ -37,20 +42,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Focus Flow',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.redAccent,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.redAccent,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: context.watch<ThemeProvider>().themeMode,
       home: onboardingComplete ? const HomeScreen() : const OnboardingScreen(),
     );
   }
