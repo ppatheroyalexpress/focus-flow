@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:focus_flow/models/timer_model.dart';
+import 'package:focus_flow/providers/timer_provider.dart';
 import '../models/todo.dart';
 import '../providers/todo_provider.dart';
 
@@ -158,9 +160,12 @@ class _TodoTile extends StatelessWidget {
 
   Color _getSessionColor(SessionType type) {
     switch (type) {
-      case SessionType.work: return Colors.redAccent;
-      case SessionType.shortBreak: return Colors.greenAccent;
-      case SessionType.longBreak: return Colors.blueAccent;
+      case SessionType.work:
+        return const Color(0xFF006064); // Deep Teal
+      case SessionType.shortBreak:
+        return const Color(0xFF4DB6AC); // Seafoam
+      case SessionType.longBreak:
+        return const Color(0xFF0097A7); // Oceanic Blue
     }
   }
 
